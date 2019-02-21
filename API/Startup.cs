@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using API.Helpers;
 using API.Services;
+using Microsoft.Extensions.Logging;
 
 namespace API
 {
@@ -76,7 +77,7 @@ namespace API
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
             if (env.IsDevelopment())
             {
@@ -95,6 +96,7 @@ namespace API
 
             app.UseAuthentication();
             app.UseMiddleware<RequestResponseLoggingMiddleware>();
+            loggerFactory.AddLog4Net();
 
             //app.UseHttpsRedirection();
             app.UseMvc();
