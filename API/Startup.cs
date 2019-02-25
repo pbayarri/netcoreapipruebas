@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 using API.Helpers;
 using API.Services;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Authorization;
 
 namespace API
 {
@@ -72,6 +73,15 @@ namespace API
                     ValidateAudience = false
                 };
             });
+
+            services.AddAuthorization(options =>
+            {
+                foreach (var functionality in System.Enum.GetValues(typeof(Functionality.Functionalities)))
+                    options.AddPolicy(functionality.ToString(), policy => 
+                        policy.Requirements.Add(new FunctionalityRequirement(functionality.ToString())));
+            });
+
+            services.AddSingleton<IAuthorizationHandler, PermissionHandler>();
 
             // configure DI for application services
             services.AddScoped<IUserService, UserService>();
