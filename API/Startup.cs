@@ -81,7 +81,7 @@ namespace API
                         policy.Requirements.Add(new FunctionalityRequirement(functionality.ToString())));
             });
 
-            services.AddSingleton<IAuthorizationHandler, PermissionHandler>();
+            services.AddSingleton<IAuthorizationHandler, FunctionalityHandler>();
 
             // configure DI for application services
             services.AddScoped<IUserService, UserService>();
