@@ -84,7 +84,7 @@ namespace API
                 }
             });
 
-            services.AddSingleton<IAuthorizationHandler, PermissionHandler>();
+            services.AddSingleton<IAuthorizationHandler, FunctionalityHandler>();
 
             // configure DI for application services
             services.AddScoped<IUserService, UserService>();
