@@ -7,6 +7,7 @@ namespace API.Helpers
 {
     public class Functionality
     {
+        public const string FuncionalitySeparator = ";";
         public enum Functionalities
         {
             GetAllUsers,

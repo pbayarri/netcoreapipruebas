@@ -77,8 +77,11 @@ namespace API
             services.AddAuthorization(options =>
             {
                 foreach (var functionality in System.Enum.GetValues(typeof(Functionality.Functionalities)))
-                    options.AddPolicy(functionality.ToString(), policy => 
-                        policy.Requirements.Add(new FunctionalityRequirement(functionality.ToString())));
+                {
+                    string policyName = $"{FunctionalityRoleAuthorizedAttribute.POLICY_PREFIX}{functionality.ToString()}";
+                    options.AddPolicy(policyName, policy =>
+                        policy.Requirements.Add(new FunctionalityRequirement(policyName)));
+                }
             });
 
             services.AddSingleton<IAuthorizationHandler, PermissionHandler>();

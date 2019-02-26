@@ -50,7 +50,7 @@ namespace WebApi.Controllers
                 Subject = new ClaimsIdentity(new Claim[]
                 {
                     new Claim(ClaimTypes.Name, user.Id.ToString()),
-                    new Claim(ClaimTypes.Role, "GetAllUsers;GetOneUser") // esto es para pruebas, tendría que venir de cargar las funcionalidades de todos los roles del usuario
+                    new Claim(ClaimTypes.Role, "GetAllUsers") // esto es para pruebas, tendría que venir de cargar las funcionalidades de todos los roles del usuario
                 }),
                 Expires = DateTime.UtcNow.AddDays(7),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
@@ -90,7 +90,7 @@ namespace WebApi.Controllers
         }
 
         [HttpGet]
-        [Authorize(Policy = "GetAllUsers")]
+        [FunctionalityRoleAuthorized("GetAllUsers")]
         public IActionResult GetAll()
         {
             var users = _userService.GetAll();
@@ -99,7 +99,7 @@ namespace WebApi.Controllers
         }
 
         [HttpGet("{id}")]
-        [Authorize(Policy = "GetOneUser")]
+        [FunctionalityRoleAuthorized("GetOneUser")]
         public IActionResult GetById(int id)
         {
             var user = _userService.GetById(id);
