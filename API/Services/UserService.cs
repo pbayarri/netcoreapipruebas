@@ -1,5 +1,7 @@
 ﻿using API.Entities;
 using API.Helpers;
+using OF.API.Base.Authentication;
+using OF.API.Base.Exception;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,11 +9,10 @@ using System.Threading.Tasks;
 
 namespace API.Services
 {
-    public interface IUserService
+    public interface IUserService : IUserServiceBasic<User>
     {
         User Authenticate(string username, string password);
         IEnumerable<User> GetAll();
-        User GetById(int id);
         User Create(User user, string password);
         void Update(User user, string password = null);
         void Delete(int id);

@@ -3,3 +3,5 @@ API/obj/
 API/API.csproj.user
 API/bin/
 .vs/
+OF.API.Base/obj
+OF.API.Base/bin

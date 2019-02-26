@@ -5,14 +5,14 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using AutoMapper;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using API.Helpers;
 using API.Services;
 using Microsoft.Extensions.Logging;
-using Microsoft.AspNetCore.Authorization;
+using OF.API.Base.Authentication;
+using OF.API.Base.Authorization;
+using OF.API.Base.Log;
+using API.Entities;
 
 namespace API
 {
@@ -34,60 +34,21 @@ namespace API
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             services.AddAutoMapper();
 
-            // configure strongly typed settings objects
+            // los settings
             var appSettingsSection = Configuration.GetSection("AppSettings");
             services.Configure<AppSettings>(appSettingsSection);
-
-            // configure jwt authentication
             var appSettings = appSettingsSection.Get<AppSettings>();
-            var key = Encoding.ASCII.GetBytes(appSettings.Secret);
-            services.AddAuthentication(x =>
-            {
-                x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-            .AddJwtBearer(x =>
-            {
-                x.Events = new JwtBearerEvents
-                {
-                    OnTokenValidated = context =>
-                    {
-                        var userService = context.HttpContext.RequestServices.GetRequiredService<IUserService>();
-                        var userId = int.Parse(context.Principal.Identity.Name);
-                        var user = userService.GetById(userId);
-                        if (user == null)
-                        {
-                            // return unauthorized if user no longer exists
-                            context.Fail("Unauthorized");
-                        }
-                        return Task.CompletedTask;
-                    }
-                };
-                x.RequireHttpsMetadata = false;
-                x.SaveToken = true;
-                x.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(key),
-                    ValidateIssuer = false,
-                    ValidateAudience = false
-                };
-            });
 
-            services.AddAuthorization(options =>
-            {
-                foreach (var functionality in System.Enum.GetValues(typeof(Functionality.Functionalities)))
-                {
-                    string policyName = $"{FunctionalityRoleAuthorizedAttribute.POLICY_PREFIX}{functionality.ToString()}";
-                    options.AddPolicy(policyName, policy =>
-                        policy.Requirements.Add(new FunctionalityRequirement(policyName)));
-                }
-            });
+            // autenticado por JWT
+            var key = appSettings.Secret;
+            services.AddJwtAuthentication<User>(key);
 
-            services.AddSingleton<IAuthorizationHandler, FunctionalityHandler>();
+            // autorizado por funcionalidades
+            services.AddRoleFunctionalities();
 
-            // configure DI for application services
+            // los servicios en la ID
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IUserServiceBasic<User>, UserService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

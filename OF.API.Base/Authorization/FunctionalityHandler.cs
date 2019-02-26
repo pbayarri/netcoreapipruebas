@@ -6,7 +6,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace API.Helpers
+namespace OF.API.Base.Authorization
 {
     public class FunctionalityHandler : AuthorizationHandler<FunctionalityRequirement>
     {

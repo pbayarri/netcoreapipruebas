@@ -12,6 +12,8 @@ using API.Helpers;
 using API.Entities;
 using AutoMapper;
 using API.Services;
+using OF.API.Base.Authorization;
+using OF.API.Base.Exception;
 
 namespace WebApi.Controllers
 {

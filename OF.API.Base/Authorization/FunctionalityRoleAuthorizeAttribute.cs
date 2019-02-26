@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace API.Helpers
+namespace OF.API.Base.Authorization
 {
-    internal class FunctionalityRoleAuthorizedAttribute : AuthorizeAttribute
+    public class FunctionalityRoleAuthorizedAttribute : AuthorizeAttribute
     {
         public const string POLICY_PREFIX = "FunctionalityRole.";
 

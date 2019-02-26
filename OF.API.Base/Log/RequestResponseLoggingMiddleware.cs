@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.Extensions.Logging;
 
-namespace API.Helpers
+namespace OF.API.Base.Log
 {
     public class RequestResponseLoggingMiddleware
     {
