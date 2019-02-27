@@ -12,6 +12,7 @@ using Microsoft.Extensions.Logging;
 using OF.API.Base.Authentication;
 using OF.API.Base.Authorization;
 using OF.API.Base.Log;
+using OF.API.Base.Cors;
 using API.Entities;
 
 namespace API
@@ -64,10 +65,10 @@ namespace API
                 app.UseHsts();
             }
 
-            app.UseCors(x => x
-                .AllowAnyOrigin()
-                .AllowAnyMethod()
-                .AllowAnyHeader());
+            var appSettingsSection = Configuration.GetSection("AppSettings");
+            var appSettings = appSettingsSection.Get<AppSettings>();
+
+            app.AddCors(appSettings.CorsAllowedOrigins, appSettings.CorsAllowedMethods, appSettings.CorsAllowedHeaders);
 
             app.UseAuthentication();
             app.UseMiddleware<RequestResponseLoggingMiddleware>();
