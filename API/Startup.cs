@@ -50,6 +50,8 @@ namespace API
             // los servicios en la ID
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IUserServiceBasic<User>, UserService>();
+            services.AddSingleton<ILoggerFilters, LogConfigurationService>();
+            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

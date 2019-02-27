@@ -11,5 +11,8 @@ namespace API.Helpers
         public string CorsAllowedOrigins { get; set; }
         public string CorsAllowedMethods { get; set; }
         public string CorsAllowedHeaders { get; set; }
+        public string SessionTimeoutInSeconds { get; set; }
+        public string LogShowPassword { get; set; }
+        public string LogShowToken { get; set; }
     }
 }

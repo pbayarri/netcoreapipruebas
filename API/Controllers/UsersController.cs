@@ -54,7 +54,8 @@ namespace WebApi.Controllers
                     new Claim(ClaimTypes.Name, user.Id.ToString()),
                     new Claim(ClaimTypes.Role, "GetAllUsers") // esto es para pruebas, tendría que venir de cargar las funcionalidades de todos los roles del usuario
                 }),
-                Expires = DateTime.UtcNow.AddDays(7),
+                NotBefore = DateTime.UtcNow,
+                Expires = DateTime.UtcNow.AddSeconds(double.Parse(_appSettings.SessionTimeoutInSeconds, System.Globalization.NumberStyles.Integer)),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
             var token = tokenHandler.CreateToken(tokenDescriptor);

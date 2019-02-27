@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.Extensions.Logging;
+using System.Text.RegularExpressions;
 
 namespace OF.API.Base.Log
 {
@@ -14,11 +15,13 @@ namespace OF.API.Base.Log
     {
         private readonly RequestDelegate _next;
         private readonly ILogger _logger;
+        private readonly ILoggerFilters _filters;
 
-        public RequestResponseLoggingMiddleware(RequestDelegate next, ILogger<RequestResponseLoggingMiddleware> logger)
+        public RequestResponseLoggingMiddleware(RequestDelegate next, ILogger<RequestResponseLoggingMiddleware> logger, ILoggerFilters filters)
         {
             _next = next;
             _logger = logger;
+            _filters = filters;
         }
 
         public async Task Invoke(HttpContext context)
@@ -63,6 +66,7 @@ namespace OF.API.Base.Log
 
             //We convert the byte[] into a string using UTF8 encoding...
             var bodyAsText = Encoding.UTF8.GetString(buffer);
+            bodyAsText = ProcessFilters(bodyAsText);
 
             //..and finally, assign the read body back to the request body, which is allowed because of EnableRewind()
             request.Body.Seek(0, SeekOrigin.Begin);
@@ -77,12 +81,21 @@ namespace OF.API.Base.Log
 
             //...and copy it into a string
             string text = await new StreamReader(response.Body).ReadToEndAsync();
+            text = ProcessFilters(text);
 
             //We need to reset the reader for the response so that the client can read it.
             response.Body.Seek(0, SeekOrigin.Begin);
 
             //Return the string for the response, including the status code (e.g. 200, 404, 401, etc.)
             return $"{response.StatusCode}: {text}";
+        }
+
+        private string ProcessFilters(string text)
+        {
+            foreach (ILogFilter filter in _filters.GetFilters())
+                text = filter.Filter(text);
+
+            return text;
         }
     }
 }
