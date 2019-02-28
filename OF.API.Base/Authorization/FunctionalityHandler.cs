@@ -15,7 +15,7 @@ namespace OF.API.Base.Authorization
             Claim functionalities = context.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role);
             var funcionalitiesList = functionalities.Value.Split(Functionality.FuncionalitySeparator);
 
-            if (funcionalitiesList.Contains(requirement.FuncionalityName.Substring(FunctionalityRoleAuthorizedAttribute.POLICY_PREFIX.Length)))
+            if (funcionalitiesList.Contains(requirement.FuncionalityName))
                 context.Succeed(requirement);
 
             return Task.CompletedTask;
