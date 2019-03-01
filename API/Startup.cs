@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,6 +13,7 @@ using OF.API.Base.Authorization;
 using OF.API.Base.Log;
 using OF.API.Base.Cors;
 using API.Entities;
+using OF.API.Base.Swagger;
 
 namespace API
 {
@@ -47,6 +47,17 @@ namespace API
             // autorizado por funcionalidades
             services.AddRoleFunctionalities();
 
+            // swagger
+            services.AddSwaggerGenerationInfo(
+                new SwaggerDocInfo(
+                    appSettings.SwaggerDocInfoVersion, 
+                    appSettings.SwaggerDocInfoTitle, 
+                    appSettings.SwaggerDocInfoDescription, 
+                    appSettings.SwaggerDocInfoTermsOfService, 
+                    appSettings.SwaggerDocInfoContactName, 
+                    appSettings.SwaggerDocInfoContactEmail, 
+                    appSettings.SwaggerDocInfoContactUrl));
+
             // los servicios en la ID
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IUserServiceBasic<User>, UserService>();
@@ -71,12 +82,15 @@ namespace API
             var appSettings = appSettingsSection.Get<AppSettings>();
 
             app.AddCors(appSettings.CorsAllowedOrigins, appSettings.CorsAllowedMethods, appSettings.CorsAllowedHeaders);
-
+            
             app.UseAuthentication();
+
+            app.UseUIOfSwagger(appSettings.SwaggerEndPointJsonUrl, appSettings.SwaggerEndPointTitle);
+            
             app.UseMiddleware<RequestResponseLoggingMiddleware>();
             loggerFactory.AddLog4Net();
 
-            //app.UseHttpsRedirection();
+            app.UseHttpsRedirection();
             app.UseMvc();
         }
     }

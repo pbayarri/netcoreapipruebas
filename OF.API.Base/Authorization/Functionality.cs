@@ -31,15 +31,6 @@ namespace OF.API.Base.Authorization
 
         public static void AddRoleFunctionalities(this IServiceCollection services)
         {
-            //services.AddAuthorization(options =>
-            //{
-            //    foreach (var functionality in System.Enum.GetValues(typeof(Functionality.Functionalities)))
-            //    {
-            //        string policyName = $"{FunctionalityRoleAuthorizedAttribute.POLICY_PREFIX}{functionality.ToString()}";
-            //        options.AddPolicy(policyName, policy =>
-            //            policy.Requirements.Add(new FunctionalityRequirement(policyName)));
-            //    }
-            //});
             services.AddSingleton<IAuthorizationRequirementBuilder, FunctionalityRequirementBuilder>();
             services.AddSingleton<IAuthorizationPolicyProvider, APIAuthorizationPolicyProvider>();
 
