@@ -14,6 +14,7 @@ using OF.API.Base.Log;
 using OF.API.Base.Cors;
 using API.Entities;
 using OF.API.Base.Swagger;
+using OF.API.Base.Utils;
 
 namespace API
 {
@@ -42,7 +43,7 @@ namespace API
 
             // autenticado por JWT
             var key = appSettings.Secret;
-            services.AddJwtAuthentication<User>(key);
+            services.AddJwtAuthentication<User, Session>(key, Util.IsTrue(appSettings.AuthValidateIP), Util.IsTrue(appSettings.AuthValidateChangedPass), Util.ToInt(appSettings.SessionTimeoutInSeconds));
 
             // autorizado por funcionalidades
             services.AddRoleFunctionalities();
@@ -61,8 +62,10 @@ namespace API
             // los servicios en la ID
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IUserServiceBasic<User>, UserService>();
+            services.AddScoped<ISessionService, SessionService>();
+            services.AddScoped<ISessionServiceBasic<Session>, SessionService>();
+
             services.AddSingleton<ILoggerFilters, LogConfigurationService>();
-            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -23,5 +23,8 @@ namespace API.Helpers
         public string SwaggerDocInfoContactUrl { get; set; }
         public string SwaggerEndPointJsonUrl { get; set; }
         public string SwaggerEndPointTitle { get; set; }
+        public string AuthValidateIP { get; set; }
+        public string AuthValidateChangedPass { get; set; }
+        public string AuthAllowMultipleSessionsPerUser { get; set; }
     }
 }

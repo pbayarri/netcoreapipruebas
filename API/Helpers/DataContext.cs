@@ -9,8 +9,10 @@ namespace API.Helpers
 {
     public class DataContext : DbContext
     {
+        public DataContext() : base() { }
         public DataContext(DbContextOptions<DataContext> options) : base(options) { }
 
         public DbSet<User> Users { get; set; }
+        public DbSet<Session> Sessions { get; set; }
     }
 }

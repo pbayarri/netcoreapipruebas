@@ -14,6 +14,8 @@ using AutoMapper;
 using API.Services;
 using OF.API.Base.Authorization;
 using OF.API.Base.Exception;
+using OF.API.Base.Utils;
+using static OF.API.Base.Authentication.Jwt;
 
 namespace WebApi.Controllers
 {
@@ -25,15 +27,18 @@ namespace WebApi.Controllers
         private IUserService _userService;
         private IMapper _mapper;
         private readonly AppSettings _appSettings;
+        private ISessionService _sessionService;
 
         public UsersController(
             IUserService userService,
             IMapper mapper,
-            IOptions<AppSettings> appSettings)
+            IOptions<AppSettings> appSettings,
+            ISessionService sessionService)
         {
             _userService = userService;
             _mapper = mapper;
             _appSettings = appSettings.Value;
+            _sessionService = sessionService;
         }
 
         [AllowAnonymous]
@@ -47,19 +52,31 @@ namespace WebApi.Controllers
 
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
+            var requestIp = Request.HttpContext.Connection.RemoteIpAddress.ToString();
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new Claim[]
                 {
                     new Claim(ClaimTypes.Name, user.Id.ToString()),
-                    new Claim(ClaimTypes.Role, "GetAllUsers") // esto es para pruebas, tendría que venir de cargar las funcionalidades de todos los roles del usuario
+                    new Claim(ClaimTypes.Role, "GetAllUsers"), // esto es para pruebas, tendría que venir de cargar las funcionalidades de todos los roles del usuario
+                    new Claim(CustomClaimTypes.Password.ToString(), Encoding.UTF8.GetString(user.PasswordHash)),
+                    new Claim(CustomClaimTypes.IP.ToString(), requestIp)
                 }),
-                NotBefore = DateTime.UtcNow,
-                Expires = DateTime.UtcNow.AddSeconds(double.Parse(_appSettings.SessionTimeoutInSeconds, System.Globalization.NumberStyles.Integer)),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+                NotBefore = DateTime.Now,
+                Expires = DateTime.Now.AddSeconds(double.Parse(_appSettings.SessionTimeoutInSeconds, System.Globalization.NumberStyles.Integer)),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
             };
             var token = tokenHandler.CreateToken(tokenDescriptor);
             var tokenString = tokenHandler.WriteToken(token);
+
+            Session newSession = new Session();
+            newSession.CreatedAt = DateTime.Now;
+            newSession.Ip = requestIp;
+            newSession.IsActive = true;
+            newSession.LastAccess = DateTime.Now;
+            newSession.Token = tokenString;
+            newSession.UserId = user.Id;
+            _sessionService.CreateSession(newSession, Util.IsTrue(_appSettings.AuthAllowMultipleSessionsPerUser));
 
             // return basic user info (without password) and token to store client side
             return Ok(new
@@ -105,7 +122,7 @@ namespace WebApi.Controllers
         [FunctionalityRoleAuthorized("GetOneUser")]
         public IActionResult GetById(int id)
         {
-            var user = _userService.GetById(id);
+            var user = _userService.GetUserById(id);
             var userDto = _mapper.Map<UserDto>(user);
             return Ok(userDto);
         }

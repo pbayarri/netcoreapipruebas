@@ -4,8 +4,9 @@ using System.Text;
 
 namespace OF.API.Base.Authentication
 {
-    public interface IUserServiceBasic<U> where U : IUserAuthentication
+    public interface IUserAuthentication
     {
-        U GetUserById(int userId);
+        string GetUserPasword();
+        string GetGeneratedToken();
     }
 }
