@@ -16,6 +16,7 @@ using OF.API.Base.Authorization;
 using OF.API.Base.Exception;
 using OF.API.Base.Utils;
 using static OF.API.Base.Authentication.Jwt;
+using System.Linq;
 
 namespace WebApi.Controllers
 {
@@ -25,6 +26,7 @@ namespace WebApi.Controllers
     public class UsersController : ControllerBase
     {
         private IUserService _userService;
+        private IRoleService _roleService;
         private IMapper _mapper;
         private readonly AppSettings _appSettings;
         private ISessionService _sessionService;
@@ -33,12 +35,14 @@ namespace WebApi.Controllers
             IUserService userService,
             IMapper mapper,
             IOptions<AppSettings> appSettings,
-            ISessionService sessionService)
+            ISessionService sessionService,
+            IRoleService roleService)
         {
             _userService = userService;
             _mapper = mapper;
             _appSettings = appSettings.Value;
             _sessionService = sessionService;
+            _roleService = roleService;
         }
 
         [AllowAnonymous]
@@ -53,15 +57,16 @@ namespace WebApi.Controllers
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
             var requestIp = Request.HttpContext.Connection.RemoteIpAddress.ToString();
+
+            List<Claim> claims = new List<Claim>();
+            claims.Add(new Claim(ClaimTypes.Name, user.Id.ToString()));
+            claims.AddRange(_roleService.GetUserFunctionalities(user.Id).ToList().Select(f => new Claim(ClaimTypes.Role, f)));
+            claims.Add(new Claim(CustomClaimTypes.Password.ToString(), Encoding.UTF8.GetString(user.PasswordHash)));
+            claims.Add(new Claim(CustomClaimTypes.IP.ToString(), requestIp));
+
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(new Claim[]
-                {
-                    new Claim(ClaimTypes.Name, user.Id.ToString()),
-                    new Claim(ClaimTypes.Role, "GetAllUsers"), // esto es para pruebas, tendría que venir de cargar las funcionalidades de todos los roles del usuario
-                    new Claim(CustomClaimTypes.Password.ToString(), Encoding.UTF8.GetString(user.PasswordHash)),
-                    new Claim(CustomClaimTypes.IP.ToString(), requestIp)
-                }),
+                Subject = new ClaimsIdentity(claims),
                 NotBefore = DateTime.Now,
                 Expires = DateTime.Now.AddSeconds(double.Parse(_appSettings.SessionTimeoutInSeconds, System.Globalization.NumberStyles.Integer)),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),

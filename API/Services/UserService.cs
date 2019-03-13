@@ -119,5 +119,20 @@ namespace API.Services
                 _context.SaveChanges();
             }
         }
+
+        public User GetUserByAccessToken(string userAccessToken)
+        {
+            return _context.Users.FirstOrDefault(user => user.UserAccessToken.Equals(userAccessToken));
+        }
+
+        public User GetDefaultUserForApiKey()
+        {
+            return _context.Users.FirstOrDefault(user => user.IsDefaultUserForApiKey);
+        }
+
+        public User GetUserByUserName(string userName)
+        {
+            return _context.Users.FirstOrDefault(user => user.Username.Equals(userName));
+        }
     }
 }

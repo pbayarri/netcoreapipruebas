@@ -12,15 +12,10 @@ namespace OF.API.Base.Authorization
     {
         protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, FunctionalityRequirement requirement)
         {
-            Claim functionalities = context.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role);
+            var funcionalitiesList = context.User.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value).ToList();
 
-            if (functionalities != null)
-            {
-                var funcionalitiesList = functionalities.Value.Split(Functionality.FuncionalitySeparator);
-
-                if (funcionalitiesList.Contains(requirement.FuncionalityName))
-                    context.Succeed(requirement);
-            }
+            if (funcionalitiesList != null && funcionalitiesList.Any() && funcionalitiesList.Contains(requirement.FuncionalityName))
+                context.Succeed(requirement);
 
             return Task.CompletedTask;
         }

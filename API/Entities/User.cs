@@ -26,10 +26,24 @@ namespace API.Entities
         public byte[] PasswordHash { get; set; }
         [Column("PasswordSalt")]
         public byte[] PasswordSalt { get; set; }
+        [Column("UserAccessToken")]
+        public string UserAccessToken { get; set; }
+        [Column("IsDefaultUserForApiKey")]
+        public bool IsDefaultUserForApiKey { get; set; }
 
         public string GetGeneratedToken()
         {
             return Encoding.UTF8.GetString(PasswordSalt);
+        }
+
+        public int GetUserId()
+        {
+            return Id;
+        }
+
+        public string GetUserName()
+        {
+            return Username;
         }
 
         public string GetUserPasword()

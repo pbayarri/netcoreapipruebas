@@ -64,6 +64,10 @@ namespace API
             services.AddScoped<IUserServiceBasic<User>, UserService>();
             services.AddScoped<ISessionService, SessionService>();
             services.AddScoped<ISessionServiceBasic<Session>, SessionService>();
+            services.AddScoped<IRoleService, RoleService>();
+            services.AddScoped<IRoleServiceBasic, RoleService>();
+            services.AddScoped<IApiKeyService, ApiKeyService>();
+            services.AddScoped<IApiKeyServiceBasic<ApiKey>, ApiKeyService>();
 
             services.AddSingleton<ILoggerFilters, LogConfigurationService>();
         }
@@ -91,6 +95,7 @@ namespace API
             app.UseUIOfSwagger(appSettings.SwaggerEndPointJsonUrl, appSettings.SwaggerEndPointTitle);
             
             app.UseMiddleware<RequestResponseLoggingMiddleware>();
+            app.UseMiddleware<ApiKeyMiddleware<User, ApiKey>>();
             loggerFactory.AddLog4Net();
 
             app.UseHttpsRedirection();
