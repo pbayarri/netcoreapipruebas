@@ -20,7 +20,7 @@ namespace API.Services
 
     public class UserService : IUserService
     {
-        private DataContext _context;
+        private readonly DataContext _context;
 
         public UserService(DataContext context)
         {

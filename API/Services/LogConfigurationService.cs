@@ -12,7 +12,7 @@ namespace API.Services
     {
         private const string TrueValue = "true";
         private readonly AppSettings _appSettings;
-        private List<ILogFilter> _filters;
+        private readonly List<ILogFilter> _filters;
 
         public LogConfigurationService(IOptions<AppSettings> appSettings)
         {

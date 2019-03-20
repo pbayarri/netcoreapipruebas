@@ -25,6 +25,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\OF.API.Base\OF.API.Base.csproj" />
+    <ProjectReference Include="..\OF.API.Front\OF.API.Front.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using OF.API.Base.Hateoas;
 
-namespace API.Dtos
+namespace OF.API.Front
 {
-    public class UserDto
+    public class UserDto : ObjectWithHateoas
     {
         public int Id { get; set; }
         public string FirstName { get; set; }

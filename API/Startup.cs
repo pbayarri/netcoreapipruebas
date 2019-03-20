@@ -15,6 +15,8 @@ using OF.API.Base.Cors;
 using API.Entities;
 using OF.API.Base.Swagger;
 using OF.API.Base.Utils;
+using OF.API.Front.Helpers;
+using System.Linq;
 
 namespace API
 {
@@ -68,12 +70,14 @@ namespace API
             services.AddScoped<IRoleServiceBasic, RoleService>();
             services.AddScoped<IApiKeyService, ApiKeyService>();
             services.AddScoped<IApiKeyServiceBasic<ApiKey>, ApiKeyService>();
+            services.AddScoped<IApiInfoService, ApiInfoService>();
 
             services.AddSingleton<ILoggerFilters, LogConfigurationService>();
+            services.AddSingleton<IHateoasHelper, HateoasHelper>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory, IHateoasHelper hateoasHelper, IApiInfoService apiInfoService)
         {
             if (env.IsDevelopment())
             {
@@ -100,6 +104,9 @@ namespace API
 
             app.UseHttpsRedirection();
             app.UseMvc();
+
+            // Inicializando los colaboradores para Hateoas según las APIs que hayamos configurado
+            apiInfoService.GetAll().ToList().ForEach(installedApi => hateoasHelper.AddCollaborator(installedApi.ApiType, installedApi.BaseHref));
         }
     }
 }

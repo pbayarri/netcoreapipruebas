@@ -17,5 +17,6 @@ namespace API.Helpers
         public DbSet<Role> Roles { get; set; }
         public DbSet<RoleFuncionality> RoleFunctionalities { get; set; }
         public DbSet<ApiKey> ApiKeys { get; set; }
+        public DbSet<ApiInfo> InstalledApis { get; set; }
     }
 }

@@ -5,3 +5,5 @@ API/bin/
 .vs/
 OF.API.Base/obj
 OF.API.Base/bin
+OF.API.Front/bin
+OF.API.Front/obj

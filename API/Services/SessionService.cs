@@ -15,7 +15,7 @@ namespace API.Services
 
     public class SessionService : ISessionService
     {
-        private DataContext _context;
+        private readonly DataContext _context;
 
         public SessionService(DataContext context)
         {

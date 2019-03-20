@@ -7,7 +7,6 @@ using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
-using API.Dtos;
 using API.Helpers;
 using API.Entities;
 using AutoMapper;
@@ -17,6 +16,8 @@ using OF.API.Base.Exception;
 using OF.API.Base.Utils;
 using static OF.API.Base.Authentication.Jwt;
 using System.Linq;
+using OF.API.Front.Helpers;
+using OF.API.Front;
 
 namespace WebApi.Controllers
 {
@@ -30,19 +31,22 @@ namespace WebApi.Controllers
         private IMapper _mapper;
         private readonly AppSettings _appSettings;
         private ISessionService _sessionService;
+        private IHateoasHelper _hateoasHelper;
 
         public UsersController(
             IUserService userService,
             IMapper mapper,
             IOptions<AppSettings> appSettings,
             ISessionService sessionService,
-            IRoleService roleService)
+            IRoleService roleService,
+            IHateoasHelper hateoasHelper)
         {
             _userService = userService;
             _mapper = mapper;
             _appSettings = appSettings.Value;
             _sessionService = sessionService;
             _roleService = roleService;
+            _hateoasHelper = hateoasHelper;
         }
 
         [AllowAnonymous]
@@ -96,6 +100,7 @@ namespace WebApi.Controllers
 
         [AllowAnonymous]
         [HttpPost("register")]
+        [FunctionalityRoleAuthorized("UserCreate")]
         public IActionResult Register([FromBody]UserDto userDto)
         {
             // map dto to entity
@@ -115,24 +120,29 @@ namespace WebApi.Controllers
         }
 
         [HttpGet]
-        [FunctionalityRoleAuthorized("GetAllUsers")]
+        [FunctionalityRoleAuthorized("UsersGet")]
         public IActionResult GetAll()
         {
             var users = _userService.GetAll();
-            var userDtos = _mapper.Map<IList<UserDto>>(users);
-            return Ok(userDtos);
+            var userDtos = _mapper.Map<List<UserDto>>(users);
+            var usersList = new UsersListDto() { Users = userDtos };
+            _hateoasHelper.CompleteLinks(usersList, User.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value).ToList());
+            return Ok(usersList);
         }
 
         [HttpGet("{id}")]
-        [FunctionalityRoleAuthorized("GetOneUser")]
+        [FunctionalityRoleAuthorized("UserGet")]
         public IActionResult GetById(int id)
         {
             var user = _userService.GetUserById(id);
             var userDto = _mapper.Map<UserDto>(user);
+            _hateoasHelper.CompleteLinks(userDto, User.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value).ToList());
+
             return Ok(userDto);
         }
 
         [HttpPut("{id}")]
+        [FunctionalityRoleAuthorized("UserUpdate")]
         public IActionResult Update(int id, [FromBody]UserDto userDto)
         {
             // map dto to entity and set id
@@ -153,6 +163,7 @@ namespace WebApi.Controllers
         }
 
         [HttpDelete("{id}")]
+        [FunctionalityRoleAuthorized("UserDelete")]
         public IActionResult Delete(int id)
         {
             _userService.Delete(id);

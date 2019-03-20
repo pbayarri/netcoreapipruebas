@@ -1,6 +1,6 @@
 ﻿using API.Entities;
 using API.Helpers;
-using OF.API.Base.Authentication;
+using OF.API.Front.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,22 +8,23 @@ using System.Threading.Tasks;
 
 namespace API.Services
 {
-    public interface IApiKeyService : IApiKeyServiceBasic<ApiKey>
+    public interface IApiInfoService
     {
+        IEnumerable<ApiInfo> GetAll();
     }
 
-    public class ApiKeyService : IApiKeyService
+    public class ApiInfoService : IApiInfoService
     {
         private readonly DataContext _context;
 
-        public ApiKeyService(DataContext context)
+        public ApiInfoService(DataContext context)
         {
             _context = context;
         }
 
-        public IEnumerable<ApiKey> GetAuthorizedApiKeys()
+        public IEnumerable<ApiInfo> GetAll()
         {
-            return _context.ApiKeys;
+            return _context.InstalledApis;
         }
     }
 }

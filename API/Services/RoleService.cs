@@ -15,7 +15,7 @@ namespace API.Services
 
     public class RoleService : IRoleService
     {
-        private DataContext _context;
+        private readonly DataContext _context;
 
         public RoleService(DataContext context)
         {
