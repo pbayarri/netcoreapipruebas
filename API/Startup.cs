@@ -17,6 +17,9 @@ using OF.API.Base.Swagger;
 using OF.API.Base.Utils;
 using OF.API.Front.Helpers;
 using System.Linq;
+using Microsoft.OData.Edm;
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Extensions;
 
 namespace API
 {
@@ -35,7 +38,11 @@ namespace API
             services.AddCors();
             services.AddDbContext<DataContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddOData();
+            services.AddMvc(options =>
+            {
+                options.EnableEndpointRouting = false;
+            }).SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             services.AddAutoMapper();
 
             // los settings
@@ -103,10 +110,22 @@ namespace API
             loggerFactory.AddLog4Net();
 
             app.UseHttpsRedirection();
-            app.UseMvc();
+            app.UseMvc(b =>
+            {
+                b.Select().Expand().Filter().OrderBy().MaxTop(100).Count();
+                b.MapODataServiceRoute("odata", "odata", GetEdmModel());
+            });
 
             // Inicializando los colaboradores para Hateoas según las APIs que hayamos configurado
             apiInfoService.GetAll().ToList().ForEach(installedApi => hateoasHelper.AddCollaborator(installedApi.ApiType, installedApi.BaseHref));
+        }
+
+        private static IEdmModel GetEdmModel()
+        {
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntitySet<User>("Users");
+            builder.EntitySet<RoleFuncionality>("Funcionalities");
+            return builder.GetEdmModel();
         }
     }
 }
