@@ -20,6 +20,7 @@ using System.Linq;
 using Microsoft.OData.Edm;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
+using System;
 
 namespace API
 {
@@ -43,6 +44,12 @@ namespace API
             {
                 options.EnableEndpointRouting = false;
             }).SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddApiVersioning(cfg =>
+            {
+                cfg.DefaultApiVersion = new ApiVersion(2, 0);
+                cfg.AssumeDefaultVersionWhenUnspecified = true;
+                cfg.ReportApiVersions = true;
+            });
             services.AddAutoMapper();
 
             // los settings
@@ -115,6 +122,7 @@ namespace API
                 b.Select().Expand().Filter().OrderBy().MaxTop(100).Count();
                 b.MapODataServiceRoute("odata", "odata", GetEdmModel());
             });
+            app.UseApiVersioning();
 
             // Inicializando los colaboradores para Hateoas según las APIs que hayamos configurado
             apiInfoService.GetAll().ToList().ForEach(installedApi => hateoasHelper.AddCollaborator(installedApi.ApiType, installedApi.BaseHref));
